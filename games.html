@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Hub - Play Popular Games</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #111; color: #eee; text-align: center; }
+    header { background: #222; padding: 20px; }
+    nav button { margin: 5px; padding: 10px 15px; border: none; border-radius: 6px; background: #444; color: white; cursor: pointer; }
+    nav button:hover { background: #666; }
+    .game { display: none; padding: 20px; }
+    .active { display: block; }
+    canvas { background: #222; margin: 20px auto; display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎮 Arcade Hub</h1>
+    <nav>
+      <button onclick="showGame('snake')">Snake</button>
+      <button onclick="showGame('game2048')">2048</button>
+      <button onclick="showGame('flappy')">Flappy Bird</button>
+      <button onclick="showGame('slope')">Slope</button>
+    </nav>
+  </header>
+
+  <!-- Snake Game -->
+  <div id="snake" class="game active"> <!-- 👈 starts active -->
+    <h2>🐍 Snake</h2>
+    <canvas id="snakeCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <!-- 2048 -->
+  <div id="game2048" class="game">
+    <h2>2048</h2>
+    <iframe src="https://play2048.co/" width="400" height="500"></iframe>
+  </div>
+
+  <!-- Flappy Bird Clone -->
+  <div id="flappy" class="game">
+    <h2>Flappy Bird</h2>
+    <iframe src="https://flappybird.io/" width="400" height="500"></iframe>
+  </div>
+
+  <!-- Slope Game -->
+  <div id="slope" class="game">
+    <h2>Slope</h2>
+    <iframe src="https://slope-game.github.io/" width="600" height="500"></iframe>
+  </div>
+
+  <script>
+    // Game switcher
+    function showGame(id) {
+      document.querySelectorAll('.game').forEach(g => g.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'snake') startSnake();
+    }
+
+    // --- Snake Game ---
+    const snakeCanvas = document.getElementById('snakeCanvas');
+    const ctx = snakeCanvas.getContext('2d');
+    let snake, food, dx, dy, snakeInterval;
+
+    function startSnake() {
+      snake = [{x: 200, y:200}];
+      food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
+      dx = 20; dy = 0;
+      clearInterval(snakeInterval);
+      snakeInterval = setInterval(updateSnake, 100);
+      document.addEventListener('keydown', changeDirection);
+    }
+
+    function changeDirection(e) {
+      if (e.key === 'ArrowUp' && dy === 0) {dx = 0; dy = -20;}
+      if (e.key === 'ArrowDown' && dy === 0) {dx = 0; dy = 20;}
+      if (e.key === 'ArrowLeft' && dx === 0) {dx = -20; dy = 0;}
+      if (e.key === 'ArrowRight' && dx === 0) {dx = 20; dy = 0;}
+    }
+
+    function updateSnake() {
+      const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
+      } else {
+        snake.pop();
+      }
+
+      if (head.x < 0 || head.y < 0 || head.x >= snakeCanvas.width || head.y >= snakeCanvas.height || snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
+        clearInterval(snakeInterval);
+        alert("Game Over! Press Snake button to play again.");
+      }
+
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0,0,snakeCanvas.width,snakeCanvas.height);
+
+      ctx.fillStyle = 'lime';
+      snake.forEach(s => ctx.fillRect(s.x, s.y, 20, 20));
+
+      ctx.fillStyle = 'red';
+      ctx.fillRect(food.x, food.y, 20, 20);
+    }
+
+    // 👇 Start Snake on first load
+    window.onload = () => startSnake();
+  </script>
+</body>
+</html>
